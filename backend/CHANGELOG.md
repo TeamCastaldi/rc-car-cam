@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/TeamCastaldi/rc-car-cam/compare/backend-v0.1.2...backend-v0.2.0) (2026-07-20)
+
+
+### Features
+
+* **backend:** add camera.Source interface and MockSource (Phase 1a) ([684f2be](https://github.com/TeamCastaldi/rc-car-cam/commit/684f2be4052f8e55b98f81b250d64f925edbc95c))
+
 ## [0.1.2](https://github.com/TeamCastaldi/rc-car-cam/compare/backend-v0.1.1...backend-v0.1.2) (2026-07-20)
 
 
