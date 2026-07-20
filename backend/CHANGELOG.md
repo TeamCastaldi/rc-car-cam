@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/TeamCastaldi/rc-car-cam/compare/backend-v0.3.0...backend-v0.4.0) (2026-07-20)
+
+
+### Features
+
+* **backend:** wire /stream route using the mock camera source (Phase 1c) ([dd5e9f3](https://github.com/TeamCastaldi/rc-car-cam/commit/dd5e9f3ae39f33b268b41d65405c85cf56064647))
+
 ## [0.3.0](https://github.com/TeamCastaldi/rc-car-cam/compare/backend-v0.2.0...backend-v0.3.0) (2026-07-20)
 
 
