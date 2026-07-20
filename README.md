@@ -6,7 +6,7 @@ A camera mounted on an RC car streams live FPV video to a phone/browser SPA so y
 
 ## Stack
 
-- **Backend** (`backend/`): Go 1.24+, standard library only (`net/http`, no framework) — a deliberate choice for a first Go project, see `CLAUDE.md` decision log
+- **Backend** (`backend/`): Go 1.24+, standard library only (`net/http`, no framework) — a deliberate choice for a first Go project, see `docs/ADRs/ADR-001-go-stdlib-backend.md`
 - **Frontend** (`frontend/`): SvelteKit (Svelte 5), TypeScript, scaffolded with `sv create`
 - **Database**: none yet — undecided, see `docs/foundation.md` open questions
 - **Test runner**: `go test` (backend), Vitest (frontend)

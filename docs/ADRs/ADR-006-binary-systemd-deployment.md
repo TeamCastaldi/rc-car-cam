@@ -1,7 +1,7 @@
 # ADR-006 — Cross-compiled binary + systemd, not Docker
 
 **Status**: Accepted
-**Date**: 2026-07-20 (reconfirmed same day after explicit review)
+**Date**: 2026-07-20
 
 ## Decision
 
