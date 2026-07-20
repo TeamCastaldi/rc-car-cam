@@ -5,9 +5,9 @@ description: "Gated workflow to initialize a coding session by syncing with git 
 ## Config
 <!-- Fill in once when you set up this repo -->
 SNAPSHOT_PATH: docs/session-history/
-TEST_COMMAND: {set by init-project — e.g. "pytest tests/ -v" or "npm test"}
-LINT_COMMAND: {set by init-project — e.g. "ruff check ." or "npm run lint"}
-SRC_ROOT: {set by init-project — the main source folder}
+TEST_COMMAND: make test
+LINT_COMMAND: make lint
+SRC_ROOT: backend/ (Go), frontend/ (SvelteKit)
 DOCS_ROOT: docs/
 
 ---

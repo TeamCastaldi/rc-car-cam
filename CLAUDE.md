@@ -16,107 +16,107 @@ A well-maintained CLAUDE.md means every new LLM session starts with full context
 
 ## Project identity
 
-<!-- 
-What does this project do? 2-3 sentences max.
-Include the public name if different from the repo name.
-Who is the intended user?
--->
+RC Car Cam — a camera mounted on an RC car streams live FPV video to a phone/browser so you can drive it beyond line of sight. It's a hands-on learning project: the point is the build itself (embedded video, streaming, networking), not solving an external pain point. Built for personal/family use, not a commercial product.
+
+This is also Nathan's first Go project. When implementing or modifying backend Go code, explain new language features, stdlib idioms, and *why* an approach was chosen as part of the response — not just a diff. Keep the explaining in conversation, not inline code comments (this repo already prefers minimal comments — see Code style). Frontend/TypeScript work doesn't need the same treatment unless asked.
 
 ## Stack
 
-<!-- 
-List the concrete technologies in use:
-- Language and version (e.g. Python 3.11)
-- Web framework (e.g. FastAPI)
-- Frontend (e.g. React 18 / Vite)
-- Database and ORM (e.g. PostgreSQL / SQLAlchemy + Alembic)
-- Test runner (pytest)
-- Linter/formatter (ruff)
-- Any other key dependencies
--->
+- **Backend** (`backend/`): Go 1.24+, standard library only (`net/http`) — no framework
+- **Frontend** (`frontend/`): SvelteKit (Svelte 5), TypeScript
+- **Database**: none yet — see Open questions
+- **Test runner**: `go test` (backend), Vitest (frontend)
+- **Linter/formatter**: `go vet` + golangci-lint + `gofmt` (backend); ESLint + Prettier (frontend)
+- **Versioning/releases**: release-please (Conventional Commits → release PRs, tags, `CHANGELOG.md`, versioned independently per package) + GoReleaser (cross-compiles and publishes the backend binary on each `backend/vX.Y.Z` tag)
+- **Deployment target**: undecided — the car's onboard computer hasn't been chosen yet
 
 ## Architecture
 
-<!--
-Describe the top-level structure of the codebase:
-- What lives in backend/, frontend/, db/
-- How the pieces connect (e.g. "FastAPI serves a REST API consumed by the React frontend")
-- Any key patterns enforced (e.g. provider adapter pattern, repository pattern)
-- Data flow at a high level
--->
+- `backend/` — the streaming server, runs on the car's onboard computer. Entry point is `cmd/server/main.go`. `internal/camera`, `internal/stream`, and `internal/api` are sketched in `backend/README.md` but not yet created — they get added once the camera/SBC hardware is chosen, not speculatively.
+- `frontend/` — the browser viewer SPA (video + controls). Talks to the backend over HTTP on the local network, base URL from `PUBLIC_API_BASE_URL`. Once built, it's served as static files by the backend itself (see ADR-005) — not run separately.
+- Intended data flow: camera → backend capture (not yet implemented) → MJPEG stream (`multipart/x-mixed-replace`, see ADR-004) → frontend `<img>` element. No autonomous/CV processing sits in this path — see Constraints.
+- No database and no auth layer exist yet. Auth must exist before either service is reachable beyond localhost (see Constraints).
+- Both stacks are driven through the root `Makefile` (`dev-backend`, `dev-frontend`, `build`, `test`, `lint`) — the `.github/prompts/*.prompt.md` files and CI reference `make test`/`make lint` rather than stack-specific commands directly, so adding a stack later means updating the Makefile in one place.
+- Full build sequence (mock pipeline → hardware bring-up → real integration → deploy → physical assembly → drive test) is phased in `docs/plans/2026-07-e2e-build-phases.md`.
 
 ## Constraints (non-negotiable)
 
-<!--
-Things Claude must never do in this repo.
-Be explicit. Examples:
-- Never commit .env or any file containing secrets
-- Never add GUI to the CLI path
-- Never bypass the adapter pattern for external APIs
-- Never store PII in profiles
--->
+- Never expose the stream or control endpoints to the public internet without auth — local network or authenticated access only.
+- Never add motor/steering control code — this project is camera + streaming only; driving the car itself is out of scope.
+- No autonomous/CV features (object detection, line-following, self-driving) — manual FPV control only.
+- No multi-user/cloud product surface — single car, single user/family, no accounts, no cloud backend.
 
 ## Code style
 
-<!--
-- Naming conventions (snake_case for Python, PascalCase for React components, etc.)
-- Docstring format (Google style recommended)
-- Type hints: required or optional?
-- Error handling patterns
-- Logging: how and where (e.g. always use setup_logger(__name__))
-- Any patterns to avoid
--->
-
-## Scoring / ranking logic (if applicable)
-
-<!--
-If this project scores, ranks, or weights things:
-- What are the weights and what do they mean?
-- Where does this logic live?
-- What is and isn't handled by LLM vs deterministic code?
--->
+- Go: `gofmt`-clean, default `golangci-lint` rule set, no custom config.
+- Svelte/TypeScript: ESLint + Prettier defaults as generated by the `sv create` scaffold, no overrides.
+- Tests are colocated next to the source they cover (`_test.go` in Go, Vitest convention in the frontend) — there is no top-level `tests/` folder.
+- Config comes from environment variables (`.env`, gitignored — see each service's `.env.example`), not flags or config files.
 
 ## Current state
 
-<!--
-Keep this current. Update at the end of each session.
-Format:
 ### Done
-- bullet list of completed work
 
-### In progress
-- bullet list of active work
-
-### Not started
-- bullet list of planned but untouched work
--->
-
-### Done
+- Repo scaffolded from template; `docs/foundation.md` and this file written.
+- `backend/`: Go module with a minimal `cmd/server` skeleton and a working `/healthz` endpoint — build, vet, and test verified clean.
+- `frontend/`: SvelteKit app scaffolded (TypeScript, ESLint, Prettier, Vitest) — lint, type-check, test, and build verified clean.
+- Root tooling in place: CI workflow (`.github/workflows/ci.yml`), `Makefile`, `dependabot.yml` entries, per-service `.env.example` files, prompt `Config` blocks updated.
 
 ### In progress
 
+(nothing yet)
+
 ### Not started
+
+- Camera capture (`backend/internal/camera`) — blocked on the onboard-computer/camera hardware choice.
+- Video streaming protocol and handlers (`backend/internal/stream`).
+- Auth for the stream/control endpoints (required before any exposure beyond localhost — see Constraints).
+- The real viewer UI in `frontend/` — currently just the SvelteKit default template page.
+- A deployment adapter for SvelteKit (`@sveltejs/adapter-auto` is a placeholder until the deployment target is known).
 
 ## Open questions
 
-<!--
-Known ambiguities, deferred decisions, or things that will 
-trip up a new LLM session if not documented.
-Format: numbered list, one question per item.
-Remove items when resolved and add a note to the relevant ADR or spec.
--->
+1. Does this need a persistent database, and for what (settings, clip metadata)? Deferred until the streaming core works.
+2. Does this integrate with the homelab's Traefik/Authentik setup, or stay fully local-network/self-contained?
+3. What onboard computer/SBC will the car run? A candidate parts list (Raspberry Pi 5, Pi Camera Module 3 Wide) is in `docs/hardware.md`, but nothing is purchased/confirmed yet. The deployment mechanism itself is decided — cross-compiled binary + systemd, not Docker (ADR-006) — only the specific board remains open.
+4. Is video recording/storage ever in scope, or strictly live-only? Not explicitly excluded during scoping, but not committed to either.
 
 ## Decision log
 
-<!--
-A running summary of key decisions. For full context see docs/ADRs/.
-Format:
-### ADR-NNN — Short title
-- One line summary of the decision
-- Key consequence
-- What was ruled out
--->
+### ADR-001 — Go + stdlib net/http for the backend
+- Chosen for the car-side streaming server; no framework (chi/Gin/Echo all considered).
+- First Go project for this team — the stdlib keeps the dependency surface at zero while learning the language, and Go 1.22+'s `ServeMux` (method + path-pattern matching) covers the routing this needs.
+- Ruled out: chi (a reasonable, low-risk upgrade later if middleware chaining becomes a real need — it's stdlib-compatible); Gin/Echo (heavier, better suited to JSON-CRUD-heavy APIs than a streaming server).
+
+### ADR-002 — SvelteKit for the frontend
+- Chosen over React+Vite and Vue+Vite for a smaller, more focused SPA with less boilerplate.
+- Scaffolded via the official `sv create` CLI (TypeScript, ESLint, Prettier, Vitest add-ons) rather than hand-written config, so it stays consistent with upstream defaults.
+
+### ADR-003 — No top-level db/ or tests/ folders
+- Database deferred as an open question rather than scaffolded speculatively ahead of a real decision.
+- Tests colocated with source in both stacks instead of a shared top-level `tests/` folder, following Go and Vitest convention.
+
+### ADR-004 — MJPEG over HTTP for the video stream
+- Chosen over WebRTC for the camera → viewer stream.
+- `multipart/x-mixed-replace` MJPEG is implementable entirely in Go stdlib (consistent with ADR-001) and renders natively in a browser `<img>` tag — no client-side decoding library needed.
+- Ruled out: WebRTC — lowest latency of the options, but needs a third-party Go library (breaks the stdlib-only decision) plus signaling/ICE machinery that's disproportionate for a single local-network viewer.
+
+### ADR-005 — Frontend served by the backend
+- The built SvelteKit app (static output) is served by the Go backend on the onboard computer, rather than run as a separate dev/preview process on a laptop or phone.
+- Means one device to open on a phone browser; nothing else to keep running elsewhere.
+- Requires picking a concrete SvelteKit adapter (static) once this is implemented — `@sveltejs/adapter-auto` is a placeholder until then.
+
+### ADR-006 — Cross-compiled binary + systemd, not Docker
+- Chosen for deploying the backend to the onboard computer.
+- A single Go binary on one resource-constrained board doesn't need a container runtime's overhead; keeps with the stdlib/zero-dependency ethos from ADR-001.
+- Ruled out: Docker — reasonable if this ever grows into a multi-service or multi-board setup, but not justified for a single binary on a single car today.
+- Reconfirmed 2026-07-20 after explicitly weighing homelab consistency (Traefik/Authentik/Plex etc. all run as Docker Compose) — kept as binary + systemd; the overhead cost on a board already doing camera/video work outweighs the tooling-consistency benefit here.
+
+### ADR-007 — release-please + GoReleaser for versioning
+- release-please automates version bumps/tags/`CHANGELOG.md` from Conventional Commits (already required by `CONTRIBUTING.md`) — same tool used on other projects, configured per-package here since `backend/` and `frontend/` version independently.
+- Go modules carry no in-repo version field (unlike `package.json`) — the version *is* the git tag. Because `backend/` is a module in a subdirectory rather than at the repo root, its tags are prefixed per Go's module-versioning spec: `backend/vX.Y.Z`, not bare `vX.Y.Z`.
+- GoReleaser triggers off those `backend/v*` tags to cross-compile the binary (linux/arm64 + linux/arm) and attach it to the GitHub Release — automates the cross-compilation step in Phase 6a of the build plan instead of a manual `go build`. Its own changelog generation is disabled since release-please already owns that.
 
 ---
 
-*Last updated: {date} | Session: {brief description}*
+*Last updated: 2026-07-20 | Session: build-phases-planning — drafted docs/plans/2026-07-e2e-build-phases.md, decided MJPEG/frontend-serving/deploy-mechanism/versioning, updated CLAUDE.md accordingly*

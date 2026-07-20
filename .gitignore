@@ -25,3 +25,10 @@ desktop.ini
 # *.db, etc.) — /init-project appends the right block(s) once the stack
 # is chosen. Project-specific entries go below that.
 # -------------------------------------------------------
+
+# Go (backend/) — frontend/ ships its own .gitignore from the SvelteKit scaffold
+backend/bin/
+*.exe
+
+# GoReleaser local runs (goreleaser release --snapshot)
+dist/
