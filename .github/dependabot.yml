@@ -11,7 +11,22 @@ updates:
       - "dependencies"
       - "github-actions"
 
-  # The init-project.prompt.md workflow (.github/prompts/init-project.prompt.md)
-  # adds one block per stack it scaffolds (e.g. "pip" for a backend/ folder,
-  # "npm" for a frontend/ folder) — see
-  # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+  # Go modules (backend/)
+  - package-ecosystem: "gomod"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "backend"
+
+  # npm (frontend/)
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "frontend"

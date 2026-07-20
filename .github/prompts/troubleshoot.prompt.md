@@ -4,8 +4,8 @@ description: "Structured debugging workflow — Observe, Theorize, Act. Use when
 
 ## Config
 <!-- Fill in once when you set up this repo -->
-TEST_COMMAND: {set by init-project — e.g. "pytest tests/ -v" or "npm test"}
-SRC_ROOT: {set by init-project — the main source folder}
+TEST_COMMAND: make test
+SRC_ROOT: backend/ (Go), frontend/ (SvelteKit)
 LOG_PATH: logs/
 
 ---
