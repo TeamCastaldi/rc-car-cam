@@ -24,7 +24,7 @@ The default template page (`src/routes/+page.svelte`) hasn't been replaced with 
 
 - Tests are colocated next to the code they cover (Vitest convention) — no separate top-level `tests/` folder.
 - `npm run lint` before committing; `npm run check` for type errors.
-- Deployment adapter is decided but not yet wired up: `adapter-static`, served by the Go backend on the onboard computer (see `CLAUDE.md` ADR-005; `docs/plans/2026-07-e2e-build-phases.md` Phase 6c). `@sveltejs/adapter-auto` is a placeholder until that phase lands.
+- Deployment adapter is decided but not yet wired up: `adapter-static`, served by the Go backend on the onboard computer (see `docs/ADRs/ADR-005-frontend-served-by-backend.md`; `docs/plans/2026-07-e2e-build-phases.md` Phase 6c). `@sveltejs/adapter-auto` is a placeholder until that phase lands.
 
 ## Environment
 

@@ -5,7 +5,7 @@ The car-side streaming server. Runs on whatever onboard computer ends up mounted
 ## Stack
 
 - Go 1.24+
-- Standard library only (`net/http`) — no web framework. First Go project for this team; the stdlib's routing (method + path patterns in `http.ServeMux`) is enough for the handful of routes this needs, and it keeps the dependency surface at zero while learning the language. See the decision log in `CLAUDE.md` for the reasoning.
+- Standard library only (`net/http`) — no web framework. First Go project for this team; the stdlib's routing (method + path patterns in `http.ServeMux`) is enough for the handful of routes this needs, and it keeps the dependency surface at zero while learning the language. See `docs/ADRs/ADR-001-go-stdlib-backend.md` for the reasoning.
 
 ## Structure
 
