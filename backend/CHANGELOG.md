@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/TeamCastaldi/rc-car-cam/compare/backend-v0.1.1...backend-v0.1.2) (2026-07-20)
+
+
+### Bug Fixes
+
+* **docs:** address Copilot PR review findings ([fec9fc1](https://github.com/TeamCastaldi/rc-car-cam/commit/fec9fc152731684f379600924699fc5ff23c3e4b))
+
 ## [0.1.1](https://github.com/TeamCastaldi/rc-car-cam/compare/backend-v0.1.0...backend-v0.1.1) (2026-07-20)
 
 
