@@ -18,6 +18,8 @@ A well-maintained CLAUDE.md means every new LLM session starts with full context
 
 RC Car Cam — a camera mounted on an RC car streams live FPV video to a phone/browser so you can drive it beyond line of sight. It's a hands-on learning project: the point is the build itself (embedded video, streaming, networking), not solving an external pain point. Built for personal/family use, not a commercial product.
 
+This is also Nathan's first Go project. When implementing or modifying backend Go code, explain new language features, stdlib idioms, and *why* an approach was chosen as part of the response — not just a diff. Keep the explaining in conversation, not inline code comments (this repo already prefers minimal comments — see Code style). Frontend/TypeScript work doesn't need the same treatment unless asked.
+
 ## Stack
 
 - **Backend** (`backend/`): Go 1.24+, standard library only (`net/http`) — no framework
