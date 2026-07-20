@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/teamcastaldi/rc-car-cam/backend/internal/camera"
+	"github.com/teamcastaldi/rc-car-cam/backend/internal/stream"
 )
 
 func main() {
@@ -13,8 +16,14 @@ func main() {
 		port = "8080"
 	}
 
+	mockSource, err := camera.NewMockSource(100 * time.Millisecond)
+	if err != nil {
+		log.Fatalf("create mock camera source: %v", err)
+	}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", handleHealthz)
+	mux.Handle("GET /stream", stream.NewHandler(mockSource))
 
 	addr := ":" + port
 	srv := &http.Server{
