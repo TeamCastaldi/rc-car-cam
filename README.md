@@ -30,6 +30,26 @@ make dev-frontend      # or: cd frontend && npm run dev -- --open
 
 Other common commands: `make build`, `make test`, `make lint` (run both stacks).
 
+## Testing
+
+From the repo root, `make test` runs both stacks (`go test ./...` in `backend/`, `npm test` in `frontend/`). `make lint` similarly runs `go vet ./... && golangci-lint run` plus `npm run lint`.
+
+To run backend tests directly:
+
+```sh
+cd backend
+go test ./...                        # run all tests
+go test ./... -v                     # verbose, see each test name pass/fail
+go test ./internal/camera/... -v     # scope to one package
+go vet ./...                         # static checks
+golangci-lint run                    # linter (see install instructions below)
+gofmt -l .                           # formatting check; no output means clean
+```
+
+To run frontend tests directly: `cd frontend && npm test`.
+
+`golangci-lint` isn't packaged for a current version via `apt`; install it with `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest` (needs `$(go env GOPATH)/bin` on your `PATH`) or `sudo snap install golangci-lint --classic` (it's published as a classic-confinement snap, so `--classic` is required).
+
 ## Project Structure
 
 ```
