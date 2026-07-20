@@ -109,6 +109,7 @@ This is also Nathan's first Go project. When implementing or modifying backend G
 - Chosen for deploying the backend to the onboard computer.
 - A single Go binary on one resource-constrained board doesn't need a container runtime's overhead; keeps with the stdlib/zero-dependency ethos from ADR-001.
 - Ruled out: Docker — reasonable if this ever grows into a multi-service or multi-board setup, but not justified for a single binary on a single car today.
+- Reconfirmed 2026-07-20 after explicitly weighing homelab consistency (Traefik/Authentik/Plex etc. all run as Docker Compose) — kept as binary + systemd; the overhead cost on a board already doing camera/video work outweighs the tooling-consistency benefit here.
 
 ---
 
