@@ -30,12 +30,22 @@ func NewHandler(src camera.Source) *Handler {
 // until the request's context is canceled (the client disconnects) or the
 // Source returns an error.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if h.Source == nil {
+		http.Error(w, "stream: no camera source configured", http.StatusInternalServerError)
+		return
+	}
+
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "stream: response writer does not support flushing", http.StatusInternalServerError)
+		return
+	}
+
 	mw := multipart.NewWriter(w)
 	w.Header().Set("Content-Type", "multipart/x-mixed-replace; boundary="+mw.Boundary())
 	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(http.StatusOK)
 
-	flusher, _ := w.(http.Flusher)
 	ctx := r.Context()
 
 	for {
@@ -59,8 +69,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if flusher != nil {
-			flusher.Flush()
-		}
+		flusher.Flush()
 	}
 }

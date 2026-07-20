@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"mime"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -52,19 +53,20 @@ func (f *fakeSource) NextFrame(ctx context.Context) ([]byte, error) {
 
 var _ camera.Source = (*fakeSource)(nil)
 
-// countingSource wraps a real Source and returns errStopTest after max
-// successful calls, ending the handler's loop deterministically.
+// countingSource wraps a real Source and reports context.Canceled after max
+// successful calls, ending the handler's loop deterministically. It uses
+// context.Canceled (rather than an arbitrary sentinel error) purely so the
+// handler treats it as an expected disconnect and doesn't log it as a real
+// Source error on every test run.
 type countingSource struct {
 	src   camera.Source
 	max   int
 	calls int
 }
 
-var errStopTest = errors.New("stream_test: stop after max frames")
-
 func (c *countingSource) NextFrame(ctx context.Context) ([]byte, error) {
 	if c.calls >= c.max {
-		return nil, errStopTest
+		return nil, context.Canceled
 	}
 	c.calls++
 	return c.src.NextFrame(ctx)
@@ -117,7 +119,7 @@ func TestHandler_ServeHTTP_WritesFramesFromMockSource(t *testing.T) {
 
 func TestHandler_ServeHTTP_SetsMultipartContentType(t *testing.T) {
 	src := &fakeSource{next: func(ctx context.Context) ([]byte, error) {
-		return nil, errStopTest
+		return nil, context.Canceled
 	}}
 	h := NewHandler(src)
 
@@ -214,5 +216,48 @@ func TestHandler_ServeHTTP_NoFramesOnImmediateError(t *testing.T) {
 	}
 	if rec.Body.Len() != 0 {
 		t.Errorf("expected empty body, got %d bytes", rec.Body.Len())
+	}
+}
+
+func TestHandler_ServeHTTP_NilSourceReturns500(t *testing.T) {
+	h := &Handler{}
+
+	req := httptest.NewRequest("GET", "/stream", nil)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	if rec.Code != 500 {
+		t.Errorf("status = %d, want 500", rec.Code)
+	}
+}
+
+// nonFlushingRecorder implements http.ResponseWriter by delegating to an
+// httptest.ResponseRecorder, but — critically — does not embed it, so it
+// doesn't inherit ResponseRecorder's Flush method and therefore doesn't
+// satisfy http.Flusher. This simulates a ResponseWriter that can't support
+// streaming.
+type nonFlushingRecorder struct {
+	rec *httptest.ResponseRecorder
+}
+
+func (n *nonFlushingRecorder) Header() http.Header         { return n.rec.Header() }
+func (n *nonFlushingRecorder) Write(b []byte) (int, error) { return n.rec.Write(b) }
+func (n *nonFlushingRecorder) WriteHeader(code int)        { n.rec.WriteHeader(code) }
+
+var _ http.ResponseWriter = (*nonFlushingRecorder)(nil)
+
+func TestHandler_ServeHTTP_NonFlusherReturns500(t *testing.T) {
+	mock, err := camera.NewMockSource(0)
+	if err != nil {
+		t.Fatalf("NewMockSource: %v", err)
+	}
+	h := NewHandler(mock)
+
+	req := httptest.NewRequest("GET", "/stream", nil)
+	rec := &nonFlushingRecorder{rec: httptest.NewRecorder()}
+	h.ServeHTTP(rec, req)
+
+	if rec.rec.Code != 500 {
+		t.Errorf("status = %d, want 500", rec.rec.Code)
 	}
 }
