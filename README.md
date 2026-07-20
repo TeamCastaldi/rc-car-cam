@@ -48,7 +48,7 @@ gofmt -l .                           # formatting check; no output means clean
 
 To run frontend tests directly: `cd frontend && npm test`.
 
-`golangci-lint` isn't packaged for a current version via `apt`; install it with `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest` (needs `$(go env GOPATH)/bin` on your `PATH`) or `sudo snap install golangci-lint`.
+`golangci-lint` isn't packaged for a current version via `apt`; install it with `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest` (needs `$(go env GOPATH)/bin` on your `PATH`) or `sudo snap install golangci-lint --classic` (it's published as a classic-confinement snap, so `--classic` is required).
 
 ## Project Structure
 
