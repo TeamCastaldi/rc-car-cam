@@ -12,13 +12,13 @@ The car-side streaming server. Runs on whatever onboard computer ends up mounted
 ```
 backend/
   cmd/server/       # entrypoint (main.go) — HTTP server bootstrap
-  internal/         # not created yet — added as real work starts:
-    camera/           - camera capture, once the board/camera module is chosen
-    stream/           - HTTP video streaming handlers (MJPEG/WebRTC/etc., TBD)
-    api/              - control/status routes beyond /healthz
+  internal/
+    camera/           - Source interface + a mock implementation (looping test image); real camera capture lands once the board/camera module is chosen
+    stream/           - not created yet — HTTP video streaming handlers (MJPEG/WebRTC/etc., TBD)
+    api/              - not created yet — control/status routes beyond /healthz
 ```
 
-Only `cmd/server/main.go` exists today, with a `/healthz` endpoint — enough to build, test, and deploy a skeleton before the camera hardware decision is made. Don't add `internal/camera` or `internal/stream` speculatively; add them when there's a real board to target.
+`internal/stream` and `internal/api` aren't created yet — add them as real work starts, not speculatively.
 
 ## Conventions
 
