@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 func main() {
@@ -16,8 +17,18 @@ func main() {
 	mux.HandleFunc("GET /healthz", handleHealthz)
 
 	addr := ":" + port
+	srv := &http.Server{
+		Addr:    addr,
+		Handler: mux,
+		// ReadHeaderTimeout mitigates slowloris-style connections. ReadTimeout and
+		// WriteTimeout are intentionally left unset: once this server hosts the
+		// video stream, either would cap the duration of a long-lived response.
+		ReadHeaderTimeout: 5 * time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
+
 	log.Printf("rc-car-cam backend listening on %s", addr)
-	if err := http.ListenAndServe(addr, mux); err != nil {
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }
