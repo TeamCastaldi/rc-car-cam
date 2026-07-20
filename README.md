@@ -43,3 +43,4 @@ For architecture decisions, see `docs/ADRs/`.
 For technical specs, see `docs/specs/`.
 For SOPs and runbooks, see `docs/SOPs/`.
 For the founding brief, see `docs/foundation.md`.
+For the hardware parts list, see `docs/hardware.md`.

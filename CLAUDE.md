@@ -74,7 +74,7 @@ RC Car Cam — a camera mounted on an RC car streams live FPV video to a phone/b
 
 1. Does this need a persistent database, and for what (settings, clip metadata)? Deferred until the streaming core works.
 2. Does this integrate with the homelab's Traefik/Authentik setup, or stay fully local-network/self-contained?
-3. What onboard computer/SBC will the car run, and how does the backend get deployed to it (cross-compiled binary + systemd vs. Docker)?
+3. What onboard computer/SBC will the car run, and how does the backend get deployed to it (cross-compiled binary + systemd vs. Docker)? A candidate parts list (Raspberry Pi 5, Pi Camera Module 3 Wide) is in `docs/hardware.md`, but nothing is purchased/confirmed yet.
 4. Is video recording/storage ever in scope, or strictly live-only? Not explicitly excluded during scoping, but not committed to either.
 
 ## Decision log
