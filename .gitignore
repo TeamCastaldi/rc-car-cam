@@ -29,3 +29,6 @@ desktop.ini
 # Go (backend/) — frontend/ ships its own .gitignore from the SvelteKit scaffold
 backend/bin/
 *.exe
+
+# GoReleaser local runs (goreleaser release --snapshot)
+dist/

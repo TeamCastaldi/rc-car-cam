@@ -7,6 +7,7 @@ Decisions baked into this plan (see `CLAUDE.md` decision log for the ADR entries
 - **Frontend deploy target: served by the onboard computer** — SvelteKit built static, served by the Go backend. One device to open on your phone; nothing to run on a laptop.
 - **Deployment mechanism: cross-compiled binary + systemd, not Docker** — this is a call made while finalizing this plan, not one of the three you were asked about. Flagging it explicitly: a single Go binary on a single resource-constrained board doesn't need a container runtime's overhead, and it keeps with the stdlib/zero-dependency ethos already set in ADR-001. Easy to revisit later if you'd rather containerize — say so and this plan (and CLAUDE.md's open question #3) updates.
 - **Branch granularity: one branch/PR per sub-phase.**
+- **Versioning: release-please + GoReleaser** (ADR-007) — tagging a `backend/vX.Y.Z` release now cross-compiles and publishes the binary automatically, which changes Phase 6a below from a manual step to "tag it and wait."
 
 ---
 
@@ -62,7 +63,7 @@ Repo scaffold, CI, `/healthz`, default frontend page, docs. No action needed.
 ## Phase 6 — Deploy to the board
 | Sub-phase | Branch | Work | Exit criteria |
 |---|---|---|---|
-| 6a | `feature/cross_compile_build` | Cross-compile the backend for the board's arch. | A real binary for that arch, built and inspected locally. |
+| 6a | — (no branch — tag a release) | Push a `backend/vX.Y.Z` tag; GoReleaser (ADR-007) cross-compiles for linux/arm64 + linux/arm and attaches the binaries to the GitHub Release. | Release page has a downloadable binary for the board's arch — no manual `go build` needed. |
 | 6b | `feature/systemd_deploy` | systemd unit + a deploy SOP. | Reboot the board, backend comes up unattended. |
 | 6c | `feature/serve_frontend_static` | SvelteKit `adapter-static` build, served by the Go backend. | Opening the board's IP on a phone shows the full app, nothing running on a laptop. |
 

@@ -27,6 +27,7 @@ This is also Nathan's first Go project. When implementing or modifying backend G
 - **Database**: none yet — see Open questions
 - **Test runner**: `go test` (backend), Vitest (frontend)
 - **Linter/formatter**: `go vet` + golangci-lint + `gofmt` (backend); ESLint + Prettier (frontend)
+- **Versioning/releases**: release-please (Conventional Commits → release PRs, tags, `CHANGELOG.md`, versioned independently per package) + GoReleaser (cross-compiles and publishes the backend binary on each `backend/vX.Y.Z` tag)
 - **Deployment target**: undecided — the car's onboard computer hasn't been chosen yet
 
 ## Architecture
@@ -111,6 +112,11 @@ This is also Nathan's first Go project. When implementing or modifying backend G
 - Ruled out: Docker — reasonable if this ever grows into a multi-service or multi-board setup, but not justified for a single binary on a single car today.
 - Reconfirmed 2026-07-20 after explicitly weighing homelab consistency (Traefik/Authentik/Plex etc. all run as Docker Compose) — kept as binary + systemd; the overhead cost on a board already doing camera/video work outweighs the tooling-consistency benefit here.
 
+### ADR-007 — release-please + GoReleaser for versioning
+- release-please automates version bumps/tags/`CHANGELOG.md` from Conventional Commits (already required by `CONTRIBUTING.md`) — same tool used on other projects, configured per-package here since `backend/` and `frontend/` version independently.
+- Go modules carry no in-repo version field (unlike `package.json`) — the version *is* the git tag. Because `backend/` is a module in a subdirectory rather than at the repo root, its tags are prefixed per Go's module-versioning spec: `backend/vX.Y.Z`, not bare `vX.Y.Z`.
+- GoReleaser triggers off those `backend/v*` tags to cross-compile the binary (linux/arm64 + linux/arm) and attach it to the GitHub Release — automates the cross-compilation step in Phase 6a of the build plan instead of a manual `go build`. Its own changelog generation is disabled since release-please already owns that.
+
 ---
 
-*Last updated: 2026-07-20 | Session: build-phases-planning — drafted docs/plans/2026-07-e2e-build-phases.md, decided MJPEG/frontend-serving/deploy-mechanism, updated CLAUDE.md accordingly*
+*Last updated: 2026-07-20 | Session: build-phases-planning — drafted docs/plans/2026-07-e2e-build-phases.md, decided MJPEG/frontend-serving/deploy-mechanism/versioning, updated CLAUDE.md accordingly*

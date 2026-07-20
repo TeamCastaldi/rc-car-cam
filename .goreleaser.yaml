@@ -1,0 +1,26 @@
+version: 2
+
+# backend/ is a Go module in a subdirectory, so its release tags are prefixed
+# (backend/vX.Y.Z) per Go's module-versioning spec. GoReleaser has no config
+# field for that prefix — the CI workflow strips it and passes the bare
+# version via GORELEASER_CURRENT_TAG before invoking this config.
+
+builds:
+  - dir: backend
+    main: ./cmd/server
+    binary: rc-car-cam-server
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - arm64
+      - arm
+    goarm:
+      - "7"
+
+archives:
+  - formats: [tar.gz]
+
+changelog:
+  disable: true
