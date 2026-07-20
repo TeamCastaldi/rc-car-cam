@@ -30,10 +30,11 @@ RC Car Cam — a camera mounted on an RC car streams live FPV video to a phone/b
 ## Architecture
 
 - `backend/` — the streaming server, runs on the car's onboard computer. Entry point is `cmd/server/main.go`. `internal/camera`, `internal/stream`, and `internal/api` are sketched in `backend/README.md` but not yet created — they get added once the camera/SBC hardware is chosen, not speculatively.
-- `frontend/` — the browser viewer SPA (video + controls). Talks to the backend over HTTP on the local network, base URL from `PUBLIC_API_BASE_URL`.
-- Intended data flow: camera → backend capture (not yet implemented) → HTTP video stream → frontend `<video>` element. No autonomous/CV processing sits in this path — see Constraints.
+- `frontend/` — the browser viewer SPA (video + controls). Talks to the backend over HTTP on the local network, base URL from `PUBLIC_API_BASE_URL`. Once built, it's served as static files by the backend itself (see ADR-005) — not run separately.
+- Intended data flow: camera → backend capture (not yet implemented) → MJPEG stream (`multipart/x-mixed-replace`, see ADR-004) → frontend `<img>` element. No autonomous/CV processing sits in this path — see Constraints.
 - No database and no auth layer exist yet. Auth must exist before either service is reachable beyond localhost (see Constraints).
 - Both stacks are driven through the root `Makefile` (`dev-backend`, `dev-frontend`, `build`, `test`, `lint`) — the `.github/prompts/*.prompt.md` files and CI reference `make test`/`make lint` rather than stack-specific commands directly, so adding a stack later means updating the Makefile in one place.
+- Full build sequence (mock pipeline → hardware bring-up → real integration → deploy → physical assembly → drive test) is phased in `docs/plans/2026-07-e2e-build-phases.md`.
 
 ## Constraints (non-negotiable)
 
@@ -74,7 +75,7 @@ RC Car Cam — a camera mounted on an RC car streams live FPV video to a phone/b
 
 1. Does this need a persistent database, and for what (settings, clip metadata)? Deferred until the streaming core works.
 2. Does this integrate with the homelab's Traefik/Authentik setup, or stay fully local-network/self-contained?
-3. What onboard computer/SBC will the car run, and how does the backend get deployed to it (cross-compiled binary + systemd vs. Docker)? A candidate parts list (Raspberry Pi 5, Pi Camera Module 3 Wide) is in `docs/hardware.md`, but nothing is purchased/confirmed yet.
+3. What onboard computer/SBC will the car run? A candidate parts list (Raspberry Pi 5, Pi Camera Module 3 Wide) is in `docs/hardware.md`, but nothing is purchased/confirmed yet. The deployment mechanism itself is decided — cross-compiled binary + systemd, not Docker (ADR-006) — only the specific board remains open.
 4. Is video recording/storage ever in scope, or strictly live-only? Not explicitly excluded during scoping, but not committed to either.
 
 ## Decision log
@@ -92,6 +93,21 @@ RC Car Cam — a camera mounted on an RC car streams live FPV video to a phone/b
 - Database deferred as an open question rather than scaffolded speculatively ahead of a real decision.
 - Tests colocated with source in both stacks instead of a shared top-level `tests/` folder, following Go and Vitest convention.
 
+### ADR-004 — MJPEG over HTTP for the video stream
+- Chosen over WebRTC for the camera → viewer stream.
+- `multipart/x-mixed-replace` MJPEG is implementable entirely in Go stdlib (consistent with ADR-001) and renders natively in a browser `<img>` tag — no client-side decoding library needed.
+- Ruled out: WebRTC — lowest latency of the options, but needs a third-party Go library (breaks the stdlib-only decision) plus signaling/ICE machinery that's disproportionate for a single local-network viewer.
+
+### ADR-005 — Frontend served by the backend
+- The built SvelteKit app (static output) is served by the Go backend on the onboard computer, rather than run as a separate dev/preview process on a laptop or phone.
+- Means one device to open on a phone browser; nothing else to keep running elsewhere.
+- Requires picking a concrete SvelteKit adapter (static) once this is implemented — `@sveltejs/adapter-auto` is a placeholder until then.
+
+### ADR-006 — Cross-compiled binary + systemd, not Docker
+- Chosen for deploying the backend to the onboard computer.
+- A single Go binary on one resource-constrained board doesn't need a container runtime's overhead; keeps with the stdlib/zero-dependency ethos from ADR-001.
+- Ruled out: Docker — reasonable if this ever grows into a multi-service or multi-board setup, but not justified for a single binary on a single car today.
+
 ---
 
-*Last updated: 2026-07-20 | Session: init-project — scaffolded Go backend + SvelteKit frontend, wrote CLAUDE.md and docs/foundation.md*
+*Last updated: 2026-07-20 | Session: build-phases-planning — drafted docs/plans/2026-07-e2e-build-phases.md, decided MJPEG/frontend-serving/deploy-mechanism, updated CLAUDE.md accordingly*
