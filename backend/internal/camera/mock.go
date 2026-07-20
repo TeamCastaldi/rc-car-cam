@@ -31,21 +31,31 @@ func NewMockSource(interval time.Duration) (*MockSource, error) {
 }
 
 // NextFrame implements Source. It always returns the same generated frame —
-// the "loop" is repeated delivery of one image, paced by interval.
+// the "loop" is repeated delivery of one image, paced by interval. The
+// returned slice is a copy, safe for the caller to hold or mutate.
 func (m *MockSource) NextFrame(ctx context.Context) ([]byte, error) {
 	if m.interval <= 0 {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		return m.frame, nil
+		return m.frameCopy(), nil
 	}
+
+	timer := time.NewTimer(m.interval)
+	defer timer.Stop()
 
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
-	case <-time.After(m.interval):
-		return m.frame, nil
+	case <-timer.C:
+		return m.frameCopy(), nil
 	}
+}
+
+func (m *MockSource) frameCopy() []byte {
+	frame := make([]byte, len(m.frame))
+	copy(frame, m.frame)
+	return frame
 }
 
 // generateTestFrame renders a small solid-color JPEG in memory, so the mock
