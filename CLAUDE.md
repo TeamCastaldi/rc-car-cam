@@ -83,39 +83,7 @@ This is also Nathan's first Go project. When implementing or modifying backend G
 
 ## Decision log
 
-### ADR-001 — Go + stdlib net/http for the backend
-- Chosen for the car-side streaming server; no framework (chi/Gin/Echo all considered).
-- First Go project for this team — the stdlib keeps the dependency surface at zero while learning the language, and Go 1.22+'s `ServeMux` (method + path-pattern matching) covers the routing this needs.
-- Ruled out: chi (a reasonable, low-risk upgrade later if middleware chaining becomes a real need — it's stdlib-compatible); Gin/Echo (heavier, better suited to JSON-CRUD-heavy APIs than a streaming server).
-
-### ADR-002 — SvelteKit for the frontend
-- Chosen over React+Vite and Vue+Vite for a smaller, more focused SPA with less boilerplate.
-- Scaffolded via the official `sv create` CLI (TypeScript, ESLint, Prettier, Vitest add-ons) rather than hand-written config, so it stays consistent with upstream defaults.
-
-### ADR-003 — No top-level db/ or tests/ folders
-- Database deferred as an open question rather than scaffolded speculatively ahead of a real decision.
-- Tests colocated with source in both stacks instead of a shared top-level `tests/` folder, following Go and Vitest convention.
-
-### ADR-004 — MJPEG over HTTP for the video stream
-- Chosen over WebRTC for the camera → viewer stream.
-- `multipart/x-mixed-replace` MJPEG is implementable entirely in Go stdlib (consistent with ADR-001) and renders natively in a browser `<img>` tag — no client-side decoding library needed.
-- Ruled out: WebRTC — lowest latency of the options, but needs a third-party Go library (breaks the stdlib-only decision) plus signaling/ICE machinery that's disproportionate for a single local-network viewer.
-
-### ADR-005 — Frontend served by the backend
-- The built SvelteKit app (static output) is served by the Go backend on the onboard computer, rather than run as a separate dev/preview process on a laptop or phone.
-- Means one device to open on a phone browser; nothing else to keep running elsewhere.
-- Requires picking a concrete SvelteKit adapter (static) once this is implemented — `@sveltejs/adapter-auto` is a placeholder until then.
-
-### ADR-006 — Cross-compiled binary + systemd, not Docker
-- Chosen for deploying the backend to the onboard computer.
-- A single Go binary on one resource-constrained board doesn't need a container runtime's overhead; keeps with the stdlib/zero-dependency ethos from ADR-001.
-- Ruled out: Docker — reasonable if this ever grows into a multi-service or multi-board setup, but not justified for a single binary on a single car today.
-- Reconfirmed 2026-07-20 after explicitly weighing homelab consistency (Traefik/Authentik/Plex etc. all run as Docker Compose) — kept as binary + systemd; the overhead cost on a board already doing camera/video work outweighs the tooling-consistency benefit here.
-
-### ADR-007 — release-please + GoReleaser for versioning
-- release-please automates version bumps/tags/`CHANGELOG.md` from Conventional Commits (already required by `CONTRIBUTING.md`) — same tool used on other projects, configured per-package here since `backend/` and `frontend/` version independently.
-- Go modules carry no in-repo version field (unlike `package.json`) — the version *is* the git tag. Because `backend/` is a module in a subdirectory rather than at the repo root, its tags are prefixed per Go's module-versioning spec: `backend/vX.Y.Z`, not bare `vX.Y.Z`.
-- GoReleaser triggers off those `backend/v*` tags to cross-compile the binary (linux/arm64 + linux/arm) and attach it to the GitHub Release — automates the cross-compilation step in Phase 6a of the build plan instead of a manual `go build`. Its own changelog generation is disabled since release-please already owns that.
+See `docs/ADRs/` for architecture decision records.
 
 ---
 

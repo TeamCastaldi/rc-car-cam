@@ -2,7 +2,7 @@
 
 Drafted 2026-07-20. Sequenced software-first: Phases 1–3 need no hardware at all, so parts can be ordered in parallel with that work (shipping lead time isn't on the critical path). Each sub-phase is scoped to be one branch/PR — small enough that "does this belong in this branch?" has an obvious answer.
 
-Decisions baked into this plan (see `CLAUDE.md` decision log for the ADR entries):
+Decisions baked into this plan (see `docs/ADRs/` for the ADR entries):
 - **Streaming protocol: MJPEG over HTTP** (`multipart/x-mixed-replace`) — stdlib-only, no third-party dependency, plenty for a local-network feed.
 - **Frontend deploy target: served by the onboard computer** — SvelteKit built static, served by the Go backend. One device to open on your phone; nothing to run on a laptop.
 - **Deployment mechanism: cross-compiled binary + systemd, not Docker** — this is a call made while finalizing this plan, not one of the three you were asked about. Flagging it explicitly: a single Go binary on a single resource-constrained board doesn't need a container runtime's overhead, and it keeps with the stdlib/zero-dependency ethos already set in ADR-001. Easy to revisit later if you'd rather containerize — say so and this plan (and CLAUDE.md's open question #3) updates.
