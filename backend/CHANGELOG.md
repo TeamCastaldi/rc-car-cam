@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/TeamCastaldi/rc-car-cam/compare/backend-v0.2.0...backend-v0.3.0) (2026-07-20)
+
+
+### Features
+
+* **backend:** add MJPEG stream handler (Phase 1b) ([bb77ff9](https://github.com/TeamCastaldi/rc-car-cam/commit/bb77ff90ebbfdb74e029153aae108ff5af7719bb))
+
+
+### Bug Fixes
+
+* **backend:** fail fast on nil Source or non-flushing ResponseWriter ([1477191](https://github.com/TeamCastaldi/rc-car-cam/commit/1477191a29bef4e2ec8f2f12e8195e1b78c4ab62))
+
 ## [0.2.0](https://github.com/TeamCastaldi/rc-car-cam/compare/backend-v0.1.2...backend-v0.2.0) (2026-07-20)
 
 
