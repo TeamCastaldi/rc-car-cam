@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/TeamCastaldi/rc-car-cam/compare/frontend-v0.1.0...frontend-v0.2.0) (2026-07-24)
+
+
+### Features
+
+* **frontend:** send the shared-secret auth token on stream requests (Phase 3b) ([8c8c351](https://github.com/TeamCastaldi/rc-car-cam/commit/8c8c3512f1cb4e8279b37d455043965a4ab3ab02))
+
 ## [0.1.0](https://github.com/TeamCastaldi/rc-car-cam/compare/frontend-v0.0.1...frontend-v0.1.0) (2026-07-21)
 
 
