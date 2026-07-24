@@ -6,14 +6,24 @@ import (
 	"os"
 	"time"
 
+	"github.com/teamcastaldi/rc-car-cam/backend/internal/auth"
 	"github.com/teamcastaldi/rc-car-cam/backend/internal/camera"
 	"github.com/teamcastaldi/rc-car-cam/backend/internal/stream"
 )
 
 func main() {
+	if err := loadDotEnv(".env"); err != nil {
+		log.Fatalf("load .env: %v", err)
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
+	}
+
+	streamAuthToken := os.Getenv("STREAM_AUTH_TOKEN")
+	if streamAuthToken == "" {
+		log.Fatal("STREAM_AUTH_TOKEN must be set (see .env.example)")
 	}
 
 	mockSource, err := camera.NewMockSource(100 * time.Millisecond)
@@ -23,7 +33,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", handleHealthz)
-	mux.Handle("GET /stream", stream.NewHandler(mockSource))
+	mux.Handle("GET /stream", auth.RequireToken(streamAuthToken, stream.NewHandler(mockSource)))
 
 	addr := ":" + port
 	srv := &http.Server{
