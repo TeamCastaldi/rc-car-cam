@@ -23,7 +23,7 @@ func main() {
 
 	streamAuthToken := os.Getenv("STREAM_AUTH_TOKEN")
 	if streamAuthToken == "" {
-		log.Fatal("STREAM_AUTH_TOKEN must be set (see backend/.env.example)")
+		log.Fatal("STREAM_AUTH_TOKEN must be set (see .env.example)")
 	}
 
 	mockSource, err := camera.NewMockSource(100 * time.Millisecond)
