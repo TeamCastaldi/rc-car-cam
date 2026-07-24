@@ -8,7 +8,7 @@ A camera mounted on an RC car streams live FPV video to a phone/browser SPA so y
 
 **All the software that can be built without hardware is done.** Phases 0–3 of `docs/plans/2026-07-e2e-build-phases.md` are complete and merged: mock camera → MJPEG streaming → shared-secret auth → frontend viewer with connection states, all verified working end-to-end in a browser.
 
-**The project is paused here, waiting on a hardware purchase (Phase 4a, `docs/hardware.md`) — not a technical blocker, a budget one.** Nathan is currently unemployed and doesn't have the funds to buy the RC car chassis / Raspberry Pi / camera module right now. There's nothing more to build in software until that happens — resist the urge to invent more Phase-3-adjacent work; the honest next step is "wait," and that's fine.
+**The project is paused here, waiting on a hardware purchase (Phase 4a, `docs/hardware.md`) — not a technical blocker, a budget one.** There's nothing more to build in software until that happens — resist the urge to invent more Phase-3-adjacent work; the honest next step is "wait," and that's fine.
 
 **When it's time to resume, the prompt is simply:**
 > "I bought the hardware for RC Car Cam — let's start Phase 4a (bring-up)."
