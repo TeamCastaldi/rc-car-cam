@@ -28,7 +28,7 @@ The default template page (`src/routes/+page.svelte`) hasn't been replaced with 
 
 ## Environment
 
-Reads `PUBLIC_API_BASE_URL` (SvelteKit's `$env/static/public`) to know where the backend is. See `.env.example`.
+Reads `PUBLIC_API_BASE_URL` and `PUBLIC_STREAM_AUTH_TOKEN` (SvelteKit's `$env/static/public`) to know where the backend is and authenticate stream requests — the token must match the backend's `STREAM_AUTH_TOKEN`. See `.env.example`.
 
 ## Running locally
 
