@@ -32,12 +32,12 @@ This is also Nathan's first Go project. When implementing or modifying backend G
 
 ## Architecture
 
-- `backend/` — the streaming server, runs on the car's onboard computer. Entry point is `cmd/server/main.go`. `internal/camera`, `internal/stream`, and `internal/api` are sketched in `backend/README.md` but not yet created — they get added once the camera/SBC hardware is chosen, not speculatively.
-- `frontend/` — the browser viewer SPA (video + controls). Talks to the backend over HTTP on the local network, base URL from `PUBLIC_API_BASE_URL`. Once built, it's served as static files by the backend itself (see ADR-005) — not run separately.
-- Intended data flow: camera → backend capture (not yet implemented) → MJPEG stream (`multipart/x-mixed-replace`, see ADR-004) → frontend `<img>` element. No autonomous/CV processing sits in this path — see Constraints.
-- No database and no auth layer exist yet. Auth must exist before either service is reachable beyond localhost (see Constraints).
-- Both stacks are driven through the root `Makefile` (`dev-backend`, `dev-frontend`, `build`, `test`, `lint`) — the `.github/prompts/*.prompt.md` files and CI reference `make test`/`make lint` rather than stack-specific commands directly, so adding a stack later means updating the Makefile in one place.
-- Full build sequence (mock pipeline → hardware bring-up → real integration → deploy → physical assembly → drive test) is phased in `docs/plans/2026-07-e2e-build-phases.md`.
+- `backend/` — the streaming server, runs on the car's onboard computer. Entry point is `cmd/server/main.go`. `internal/camera` (mock `Source` + `MockSource`), `internal/stream` (MJPEG handler), and `internal/auth` (shared-secret token middleware) all exist and are wired in. `internal/api` is still sketched-only, not created — add it once real control/status routes are needed, not speculatively.
+- `frontend/` — the browser viewer SPA. `src/routes/+page.svelte` is the real viewer now (not the SvelteKit default template) — an `<img>` pointed at `PUBLIC_API_BASE_URL` + `/stream` (with the auth token as a query param), loading/connected/error states with auto-recovery via a `/healthz` liveness poll. Talks to the backend over HTTP on the local network only. Once built for real deployment, it's served as static files by the backend itself (see ADR-005) — not run separately. **No driving controls exist or are planned in the frontend** — the RC car's physical RF transmitter remains the only way to drive; this was explicitly confirmed as a permanent scope boundary, not a "not started yet" item (see Constraints).
+- Data flow (working end-to-end with the mock camera): `camera.MockSource` → `stream.Handler` (MJPEG, `multipart/x-mixed-replace`, see ADR-004) → `auth.RequireToken` middleware on `/stream` → frontend `<img>` element. No autonomous/CV processing sits in this path — see Constraints. Real camera hardware swaps in for the mock at Phase 5 with no other layer changing.
+- Auth exists and is enforced: `STREAM_AUTH_TOKEN` (backend) / `PUBLIC_STREAM_AUTH_TOKEN` (frontend, must match) are required — the backend fails to start without a token set. No database exists yet (see Open questions).
+- Both stacks are driven through the root `Makefile` (`dev-backend`, `dev-frontend`, `build`, `test`, `lint`) — **run `make` targets from the repo root, not from inside `backend/`/`frontend/`** (a recurring gotcha — the Makefile's targets assume the root as cwd). The `.github/prompts/*.prompt.md` files and CI reference `make test`/`make lint` rather than stack-specific commands directly, so adding a stack later means updating the Makefile in one place.
+- Full build sequence (mock pipeline → hardware bring-up → real integration → deploy → physical assembly → drive test) is phased in `docs/plans/2026-07-e2e-build-phases.md`. **Phases 0–3 (the entire software-only mock pipeline) are done as of 2026-07-24.** Phase 4 onward requires physical hardware that hasn't been purchased yet — see "Current state" and the root `README.md`'s "Where things stand" section before starting new feature work.
 
 ## Constraints (non-negotiable)
 
@@ -55,24 +55,26 @@ This is also Nathan's first Go project. When implementing or modifying backend G
 
 ## Current state
 
+**Phases 0–3 of `docs/plans/2026-07-e2e-build-phases.md` are complete — the entire software-only mock pipeline works end-to-end, verified live in a browser.** Everything remaining is blocked on Phase 4a: buying the physical hardware (`docs/hardware.md`). See the root `README.md`'s "Where things stand" section for the resume plan — **read that section, and this one, before starting any new feature work**, since the honest next step is "wait for hardware," not "find more software to build."
+
 ### Done
 
 - Repo scaffolded from template; `docs/foundation.md` and this file written.
-- `backend/`: Go module with a minimal `cmd/server` skeleton and a working `/healthz` endpoint — build, vet, and test verified clean.
-- `frontend/`: SvelteKit app scaffolded (TypeScript, ESLint, Prettier, Vitest) — lint, type-check, test, and build verified clean.
-- Root tooling in place: CI workflow (`.github/workflows/ci.yml`), `Makefile`, `dependabot.yml` entries, per-service `.env.example` files, prompt `Config` blocks updated.
+- `backend/`: Go module, `/healthz`, `camera.Source`/`MockSource` (mock frame producer), `stream.Handler` (MJPEG `multipart/x-mixed-replace` streaming), `auth.RequireToken` (shared-secret token middleware, fails closed if `STREAM_AUTH_TOKEN` unset), a stdlib-only `.env` loader (`cmd/server/env.go` — nothing else in this repo loads `.env` files). `/stream` wired in, auth-gated. Build, vet, lint, and full test suite (24 tests) verified clean.
+- `frontend/`: SvelteKit app scaffolded and the real viewer built — `+page.svelte` shows the live MJPEG feed via `<img>`, with loading/connected/error states, a `/healthz` liveness poll with auto-recovery, and the shared-secret token sent as a `?token=` query param (`PUBLIC_STREAM_AUTH_TOKEN`, must match the backend's `STREAM_AUTH_TOKEN`). Lint, type-check, test, and build verified clean.
+- Root tooling in place: CI workflow (`.github/workflows/ci.yml`), `Makefile`, `dependabot.yml` entries, per-service `.env.example` files, prompt `Config` blocks updated, root README's "Testing" section documents the exact commands.
+- release-please cutting real releases per-component: `backend` and `frontend` both have live tags/CHANGELOGs now (first frontend release, `v0.1.0`, shipped alongside Phase 2/3 work).
 
 ### In progress
 
-(nothing yet)
+(nothing — paused pending hardware purchase, see above)
 
-### Not started
+### Not started (blocked on hardware, Phase 4+)
 
-- Camera capture (`backend/internal/camera`) — blocked on the onboard-computer/camera hardware choice.
-- Video streaming protocol and handlers (`backend/internal/stream`).
-- Auth for the stream/control endpoints (required before any exposure beyond localhost — see Constraints).
-- The real viewer UI in `frontend/` — currently just the SvelteKit default template page.
-- A deployment adapter for SvelteKit (`@sveltejs/adapter-auto` is a placeholder until the deployment target is known).
+- Hardware purchase (`docs/hardware.md`) — Phase 4a. **This is the actual blocker**, not a technical unknown.
+- OS bring-up SOP, real camera capture swap, systemd deploy, static frontend serving, physical mounting, real-world drive test — Phases 4 through 8, all sequenced after purchase in `docs/plans/2026-07-e2e-build-phases.md`.
+- A deployment adapter for SvelteKit (`@sveltejs/adapter-auto` is a placeholder until the deployment target — Phase 6c — is reached).
+- `backend/internal/api` (control/status routes beyond `/healthz`) — not created, no concrete need for it yet.
 
 ## Open questions
 
@@ -87,4 +89,4 @@ See `docs/ADRs/` for architecture decision records.
 
 ---
 
-*Last updated: 2026-07-20 | Session: build-phases-planning — drafted docs/plans/2026-07-e2e-build-phases.md, decided MJPEG/frontend-serving/deploy-mechanism/versioning, updated CLAUDE.md accordingly*
+*Last updated: 2026-07-24 | Session: phases-0-3-complete-docs-sync — Phases 1a through 3b all shipped and merged this session (PRs #13–#25); the mock pipeline + frontend viewer + auth all work end-to-end, verified live. Confirmed no driving-controls scope creep (RF transmitter stays the only control path — permanent decision, not deferred). This update marks Phases 0–3 done across CLAUDE.md, the build-phases doc, and the root README, and adds a "Where things stand" resume note since the project is now paused on Phase 4a (hardware purchase) for budget reasons.*

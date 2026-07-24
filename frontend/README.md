@@ -1,6 +1,6 @@
 # Frontend
 
-The viewer SPA: shows the car's live FPV video feed and driving controls in the browser (phone or laptop). Talks to `backend/` over HTTP on the local network — nothing else.
+The viewer SPA: shows the car's live FPV video feed in the browser (phone or laptop). No driving controls — never will be; the RC car's own RF transmitter is the only way to drive it, a permanent scope boundary (see root `CLAUDE.md` Constraints), not a future feature. Talks to `backend/` over HTTP on the local network — nothing else.
 
 ## Stack
 
@@ -18,7 +18,7 @@ frontend/
   static/       # static assets
 ```
 
-The default template page (`src/routes/+page.svelte`) hasn't been replaced with the real viewer yet — that's the first real frontend work (see `CLAUDE.md` Current State).
+`src/routes/+page.svelte` is the real viewer (Phases 2a/2b/3b) — an `<img>` streaming the live MJPEG feed with loading/connected/error states, auto-recovery via a `/healthz` liveness poll, and the shared-secret auth token sent as a query param. No component library yet — `src/lib/` still only has the scaffold's `vitest-examples/` placeholder.
 
 ## Conventions
 

@@ -14,36 +14,38 @@ Decisions baked into this plan (see `docs/ADRs/` for the ADR entries):
 ## Phase 0 — Foundations *(done)*
 Repo scaffold, CI, `/healthz`, default frontend page, docs. No action needed.
 
-## Phase 1 — Mock video pipeline *(no hardware)*
+## Phase 1 — Mock video pipeline *(done, no hardware)*
 | Sub-phase | Branch | Work | Exit criteria |
 |---|---|---|---|
-| 1a | `feature/mock_camera_source` | Define a small `Source` interface (the seam between "frame producer" and "HTTP handler") + a mock implementation (looping test image). | Interface + mock compile, have unit tests, nothing else wired up yet. |
-| 1b | `feature/mjpeg_stream_handler` | Implement the `internal/stream` HTTP handler: consumes a `Source`, writes an MJPEG (`multipart/x-mixed-replace`) response. | Handler unit-tested against the mock `Source`. |
-| 1c | `feature/wire_mock_stream_route` | Wire a `/stream` route into `main.go` using the mock source. | `curl`/browser hitting `/stream` shows the looping mock feed. |
+| 1a *(done, PR #13)* | `feature/mock_camera_source` | Define a small `Source` interface (the seam between "frame producer" and "HTTP handler") + a mock implementation (looping test image). | Interface + mock compile, have unit tests, nothing else wired up yet. |
+| 1b *(done, PR #15)* | `feature/mjpeg_stream_handler` | Implement the `internal/stream` HTTP handler: consumes a `Source`, writes an MJPEG (`multipart/x-mixed-replace`) response. | Handler unit-tested against the mock `Source`. |
+| 1c *(done, PR #18)* | `feature/wire_mock_stream_route` | Wire a `/stream` route into `main.go` using the mock source. | `curl`/browser hitting `/stream` shows the looping mock feed. |
 
 **Not in scope for Phase 1:** real camera code, auth, frontend changes, anything hardware.
 
-## Phase 2 — Frontend viewer *(no hardware)*
+## Phase 2 — Frontend viewer *(done, no hardware)*
 | Sub-phase | Branch | Work | Exit criteria |
 |---|---|---|---|
-| 2a | `feature/frontend_viewer_page` | Replace the default SvelteKit page with a minimal viewer (`<img>` pointed at `PUBLIC_API_BASE_URL` + `/stream` — MJPEG streams natively via a plain `<img src>`, no `<video>`/JS decoding needed). | Opening the frontend shows the live mock feed end-to-end. |
-| 2b | `feature/viewer_connection_states` | Basic loading/error/connected states. | Killing the backend shows an error state, not a broken image icon. |
+| 2a *(done, PR #20)* | `feature/frontend_viewer_page` | Replace the default SvelteKit page with a minimal viewer (`<img>` pointed at `PUBLIC_API_BASE_URL` + `/stream` — MJPEG streams natively via a plain `<img src>`, no `<video>`/JS decoding needed). | Opening the frontend shows the live mock feed end-to-end. |
+| 2b *(done, PR #22)* | `feature/viewer_connection_states` | Basic loading/error/connected states. | Killing the backend shows an error state, not a broken image icon. |
 
 **Not in scope:** driving controls, visual polish, auth UI.
 
-## Phase 3 — Auth *(no hardware)*
+## Phase 3 — Auth *(done, no hardware)*
 | Sub-phase | Branch | Work | Exit criteria |
 |---|---|---|---|
-| 3a | `feature/stream_auth_middleware` | Shared-secret token middleware on `/stream` (and any control routes), reading `STREAM_AUTH_TOKEN` (already stubbed in `backend/.env.example` — uncomment it here). | Request without token fails (401/403); with it, succeeds. Both paths tested. |
-| 3b | `feature/frontend_auth_token` | Frontend sends the token on stream requests. | Viewer works end-to-end with auth enabled. |
+| 3a *(done, PR #24)* | `feature/stream_auth_middleware` | Shared-secret token middleware on `/stream` (and any control routes), reading `STREAM_AUTH_TOKEN` (already stubbed in `backend/.env.example` — uncomment it here). | Request without token fails (401/403); with it, succeeds. Both paths tested. |
+| 3b *(done, PR #25)* | `feature/frontend_auth_token` | Frontend sends the token on stream requests. | Viewer works end-to-end with auth enabled. |
 
 **Not in scope:** accounts, multi-user, Authentik/Traefik integration (separate deferred decision — open question #2).
+
+Phases 0–3 are fully complete as of 2026-07-24 — the entire mock pipeline (camera → MJPEG stream → auth-gated `/stream` route → frontend viewer with connection states) works end-to-end locally, verified live. **Everything from here on is blocked on Phase 4a (hardware purchase) — see the root `README.md`'s "Where things stand" section for the current holdup and how to resume.**
 
 ---
 
 *Parts can be ordered any time during Phases 1–3.*
 
-## Phase 4 — Hardware bring-up *(the purchase + first boot, no custom code)*
+## Phase 4 — Hardware bring-up *(the purchase + first boot, no custom code)* — NEXT UP, BLOCKED ON PURCHASE
 | Sub-phase | Branch | Work | Exit criteria |
 |---|---|---|---|
 | 4a | — (purchase, not a branch) | Buy per `docs/hardware.md`. | Parts in hand. |
