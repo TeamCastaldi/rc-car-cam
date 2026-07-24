@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PUBLIC_API_BASE_URL } from '$env/static/public';
+	import { PUBLIC_API_BASE_URL, PUBLIC_STREAM_AUTH_TOKEN } from '$env/static/public';
 
 	type ConnectionState = 'loading' | 'connected' | 'error';
 	let connectionState: ConnectionState = $state('loading');
@@ -37,7 +37,9 @@
 {/if}
 
 <img
-	src="{PUBLIC_API_BASE_URL}/stream?r={reloadNonce}"
+	src="{PUBLIC_API_BASE_URL}/stream?token={encodeURIComponent(
+		PUBLIC_STREAM_AUTH_TOKEN
+	)}&r={reloadNonce}"
 	alt="Live RC car camera feed"
 	onload={() => (connectionState = 'connected')}
 	onerror={() => (connectionState = 'error')}
