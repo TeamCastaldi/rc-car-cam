@@ -14,11 +14,12 @@ backend/
   cmd/server/       # entrypoint (main.go) — HTTP server bootstrap
   internal/
     camera/           - Source interface + a mock implementation (looping test image); real camera capture lands once the board/camera module is chosen
-    stream/           - not created yet — HTTP video streaming handlers (MJPEG/WebRTC/etc., TBD)
+    stream/           - MJPEG (multipart/x-mixed-replace) HTTP streaming handler
+    auth/             - shared-secret token middleware (protects /stream and any future control routes)
     api/              - not created yet — control/status routes beyond /healthz
 ```
 
-`internal/stream` and `internal/api` aren't created yet — add them as real work starts, not speculatively.
+`internal/api` isn't created yet — add it as real work starts, not speculatively.
 
 ## Conventions
 
@@ -35,8 +36,10 @@ backend/
 ## Running locally
 
 ```
-cp .env.example .env   # then edit as needed
+cp .env.example .env   # then set a real STREAM_AUTH_TOKEN
 go run ./cmd/server
 ```
+
+The server refuses to start without `STREAM_AUTH_TOKEN` set — pass it either as `?token=<value>` on `/stream` requests or an `Authorization: Bearer <value>` header.
 
 Or via the root `Makefile`: `make dev-backend`.
