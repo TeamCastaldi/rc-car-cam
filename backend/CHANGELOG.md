@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/TeamCastaldi/rc-car-cam/compare/backend-v0.4.0...backend-v0.5.0) (2026-07-24)
+
+
+### Features
+
+* **backend:** add shared-secret token auth for /stream (Phase 3a) ([b12a492](https://github.com/TeamCastaldi/rc-car-cam/commit/b12a4923af7d55907bc1d1560b499b3d82c89e35))
+
+
+### Bug Fixes
+
+* **backend:** fix auth edge cases flagged by Copilot review ([8892af8](https://github.com/TeamCastaldi/rc-car-cam/commit/8892af8d9a8bb320ceb599146621ea0be3acd490))
+
 ## [0.4.0](https://github.com/TeamCastaldi/rc-car-cam/compare/backend-v0.3.0...backend-v0.4.0) (2026-07-20)
 
 
